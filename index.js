@@ -1,6 +1,4 @@
-// Import
-import Person from './person.js';
+// IMporting 
+import { celciusToFahrenheit } from "./utils.js";
 
-const person1 = new Person('Baker',21);
-
-person1.greet(); 
+console.log(`The temperature in Fahrenheit is ${celciusToFahrenheit(0)}`);
