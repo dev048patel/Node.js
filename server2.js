@@ -24,7 +24,7 @@ const getUsersHandler = (req, res) => {
 };
 
 //Router handler for GET /api/users/id
-const getUSerByIdHandler = (req, res)  =>  {
+const getUserByIdHandler = (req, res)  =>  {
     const userId = req.url.split('/')[3]; // Extract user ID from URL
     const user = users.find( (user) => user.id === parseInt(userId) ); // Find user by ID 
     if(user){ // If the user exists
@@ -36,7 +36,24 @@ const getUSerByIdHandler = (req, res)  =>  {
     res.end();
 }
 
-// Not found handler
+// Router handler for POST /api/users
+const createUserHandler = (req,res) => {
+    let body = ''; // Initialize an empty string to hold the request body
+    // Listen for data, so when data happens then this callback function will be called
+    req.on('data', (chunk) => {
+        body += chunk.toString(); // Convert Buffer to string
+    });
+    req.on('end', () =>{ 
+        const newUser = JSON.parse(body); // Turniong JSON to JS
+        users.push(newUser); // Add new user to the users array
+        res.statusCode = 201; // Status Successful 
+        res.write(JSON.stringify(newUser)); // Turning JS to JSON\
+        res.end();
+    });
+};
+
+
+// Not found handler              
 const notFoundHandler = (req, res) => {
     res.statusCode = 404;
      res.setHeader('Content-Type', 'text/plain');
@@ -47,11 +64,14 @@ const notFoundHandler = (req, res) => {
 const server = createServer((req,res) => {
     Logger (req,res,() => {
         jsonMiddleware (req, res,() => {
-            if(req.url === 'api/users' && req.method === 'GET'){
+            if(req.url === '/api/users' && req.method === 'GET'){
                 getUsersHandler(req, res);
             } else if(req.url.match(/\/api\/users\/([0-9]+)/) && req.method === 'GET') {
-                getUSerByIdHandler(req, res);
-            }else{
+                getUserByIdHandler(req, res);
+            } else if(req.url === '/api/users' && req.method === 'POST'){
+                createUserHandler(req,res);
+            }
+            else{
                 notFoundHandler(req, res);
             }
         })
